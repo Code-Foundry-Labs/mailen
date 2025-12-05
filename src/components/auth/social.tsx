@@ -1,6 +1,6 @@
-import { FaGoogle, FaXTwitter, FaWindows, FaGithub } from "react-icons/fa6";
+import { FaGithub, FaGoogle, FaWindows, FaXTwitter } from "react-icons/fa6";
 
-import { Button } from '../ui/button'
+import { Button } from '../ui/button';
 
 const Social = ({ disabled = false }: { disabled?: boolean }) => {
     return (
@@ -18,7 +18,7 @@ const Social = ({ disabled = false }: { disabled?: boolean }) => {
                 <FaGithub />
             </Button>
         </div>
-    )w
+    )
 }
 
 export default Social
