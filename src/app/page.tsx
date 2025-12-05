@@ -1,5 +1,6 @@
 "use client"
 
+import ThemeToggle from "@/components/global/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { toast } from "@/lib/toast-store"
 
@@ -25,6 +26,7 @@ const Home = () => {
           Error Toast
         </Button>
       </div>
+      <ThemeToggle />
     </div>
   )
 }

@@ -57,9 +57,9 @@ export function ToastItem({ toast, onDismiss, position = "bottom-right" }: Toast
     const getStyles = () => {
         switch (toast.type) {
             case "success":
-                return "bg-[#00A84D] text-white pl-[6px] pr-1.5 py-1.5"
+                return "bg-success text-white pl-[6px] pr-1.5 py-1.5"
             case "destructive":
-                return "bg-[#EF4444] text-white pl-[6px] pr-1.5 py-1.5"
+                return "bg-destructive text-white pl-[6px] pr-1.5 py-1.5"
             default:
                 return "bg-[#1F1F1F] text-white pl-5 pr-1.5 py-1.5"
         }
@@ -83,7 +83,7 @@ export function ToastItem({ toast, onDismiss, position = "bottom-right" }: Toast
                 {getIcon() && (
                     getIcon()
                 )}
-                <p className="text-sm font-medium whitespace-nowrap">{toast.message}</p>
+                <p className="text-sm font-medium whitespace-nowrap tracking-tight">{toast.message}</p>
             </div>
 
             <button
