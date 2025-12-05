@@ -18,7 +18,7 @@ const Social = ({ disabled = false }: { disabled?: boolean }) => {
                 <FaGithub />
             </Button>
         </div>
-    )
+    )w
 }
 
 export default Social
