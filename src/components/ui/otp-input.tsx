@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { toast } from "@/lib/toast-store";
 import { cn } from "@/lib/utils";
 import { Clipboard, Delete } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -60,6 +61,7 @@ export function OtpInput({
       } else {
         setInternalValue(formatted);
       }
+      toast.normal("Pasted from clipboard");
     } catch (err) {
       console.error("Failed to read clipboard:", err);
     }

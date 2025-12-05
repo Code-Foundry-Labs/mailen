@@ -9,7 +9,7 @@ const Logo = () => {
     if (isDark) {
         // Dark mode version - white/light colors on semi-transparent black background
         return (
-            <svg xmlns="http://www.w3.org/2000/svg" width="66" height="66" viewBox="0 0 66 66" fill="none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 66 66" fill="none">
                 <g filter="url(#filter0_ddiii_30_1506)">
                     <g clipPath="url(#clip0_30_1506)">
                         <rect x="3" width="60" height="60" rx="16" fill="black" fillOpacity="0.5" shapeRendering="crispEdges" />
@@ -99,7 +99,7 @@ const Logo = () => {
 
     // Light mode version - original dark colors
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="66" height="66" viewBox="0 0 66 66" fill="none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 66 66" fill="none">
             <g filter="url(#filter0_ddiii_22_1375)">
                 <g clipPath="url(#clip0_22_1375)">
                     <rect x="3" width="60" height="60" rx="16" fill="#0A0D12" />

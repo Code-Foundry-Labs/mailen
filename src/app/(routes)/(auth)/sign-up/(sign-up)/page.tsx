@@ -2,6 +2,7 @@
 
 import AuthCard from "@/components/auth/auth-card"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
     Form,
     FormControl,
@@ -12,21 +13,24 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { PasswordInput } from "@/components/ui/password-input"
-import { signInSchema, type signInFormData } from "@/schemas"
+import { signUpFormData, signUpSchema } from "@/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 
-const SignInPage = () => {
-    const form = useForm<signInFormData>({
-        resolver: zodResolver(signInSchema),
+const SignUpPage = () => {
+    const form = useForm<signUpFormData>({
+        resolver: zodResolver(signUpSchema),
         defaultValues: {
             email: "",
             password: "",
+            acceptTerms: true,
         },
     })
 
-    const onSubmit = (data: signInFormData) => {
+    const acceptTerms = form.watch("acceptTerms")
+
+    const onSubmit = (data: signUpFormData) => {
         console.log(data)
         // TODO: Implement sign in logic
     }
@@ -34,9 +38,10 @@ const SignInPage = () => {
     return (
         <div className=" w-full flex flex-col items-center">
             <AuthCard
-                title="Sign in to Mailėn"
+                title="Sign Up to Mailėn"
                 description="Email marketing. Simplified for GenZ"
                 socialLogin
+                disableSocialLogin={!acceptTerms}
             >
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2">
@@ -71,7 +76,7 @@ const SignInPage = () => {
                                             <PasswordInput
                                                 className="border-none px-0 pr-10 focus-visible:ring-0 h-10 rounded-none shadow-none bg-transparent dark:bg-transparent"
                                                 autoComplete="current-password"
-                                                placeholder="Enter your password"
+                                                placeholder="Create a password"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -80,17 +85,36 @@ const SignInPage = () => {
                                 </FormItem>
                             )}
                         />
-                        <Link href="/forgot-password">
+
+                        <FormField
+                            control={form.control}
+                            name="acceptTerms"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <div className="flex items-center gap-3 rounded-xl py-3 px-3 bg-card border">
+                                        <FormControl>
+                                            <Checkbox
+                                                checked={field.value}
+                                                onCheckedChange={field.onChange}
+                                            />
+                                        </FormControl>
+                                        <FormLabel className="text-sm font-normal cursor-pointer">
+                                            I agree to all terms and conditions
+                                        </FormLabel>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <Button type="submit" className="w-full mt-4">
+                            Continue with password
+                        </Button>
+                        <Link href="/sign-in">
                             <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
-                                Forgot Password?<span className=" text-foreground group-hover:underline underline-offset-3">Reset</span>
+                                Already have an account?<span className=" text-foreground group-hover:underline underline-offset-3">Sign In</span>
                             </Button>
                         </Link>
-                        <Button type="submit" className="w-full mt-4">
-                            Sign In
-                        </Button>
-                        <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
-                            Don&apos;t have an account?<span className=" text-foreground group-hover:underline underline-offset-3">Create Account</span>
-                        </Button>
                     </form>
                 </Form>
             </AuthCard>
@@ -98,4 +122,4 @@ const SignInPage = () => {
     )
 }
 
-export default SignInPage
+export default SignUpPage
