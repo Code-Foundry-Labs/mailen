@@ -8,6 +8,8 @@ import { DataModel } from "./_generated/dataModel";
 import { query } from "./_generated/server";
 
 
+const siteUrl = process.env.SITE_URL!;
+
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
 export const createAuth = (
@@ -18,11 +20,7 @@ export const createAuth = (
     logger: {
       disabled: optionsOnly,
     },
-    baseURL: process.env.SITE_URL!,
-    trustedOrigins: [
-      "https://mailen.vercel.app",
-      "http://localhost:3000"
-    ],
+    trustedOrigins: [siteUrl],
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
