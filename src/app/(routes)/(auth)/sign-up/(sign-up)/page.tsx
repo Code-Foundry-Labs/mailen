@@ -13,12 +13,20 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { PasswordInput } from "@/components/ui/password-input"
+import { authClient } from "@/lib/auth-client"
 import { signUpFormData, signUpSchema } from "@/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Loader2 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 
 const SignUpPage = () => {
+    const router = useRouter()
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
     const form = useForm<signUpFormData>({
         resolver: zodResolver(signUpSchema),
         defaultValues: {
@@ -30,9 +38,23 @@ const SignUpPage = () => {
 
     const acceptTerms = form.watch("acceptTerms")
 
-    const onSubmit = (data: signUpFormData) => {
-        console.log(data)
-        // TODO: Implement sign in logic
+    const onSubmit = async (data: signUpFormData) => {
+        setIsLoading(true)
+        setError(null)
+
+        const { error } = await authClient.signUp.email({
+            email: data.email,
+            password: data.password,
+            name: data.email.split("@")[0],
+        })
+
+        if (error) {
+            setError(error.message ?? "An error occurred during sign up")
+            setIsLoading(false)
+            return
+        }
+
+        router.push("/sign-up/verify-email")
     }
 
     return (
@@ -107,11 +129,24 @@ const SignUpPage = () => {
                             )}
                         />
 
-                        <Button type="submit" className="w-full mt-4">
-                            Continue with password
+                        {error && (
+                            <div className="rounded-xl py-3 px-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                                {error}
+                            </div>
+                        )}
+
+                        <Button type="submit" className="w-full mt-4" disabled={isLoading}>
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="size-4 animate-spin" />
+                                    Signing up...
+                                </>
+                            ) : (
+                                "Continue with password"
+                            )}
                         </Button>
                         <Link href="/sign-in">
-                            <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
+                            <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9" disabled={isLoading}>
                                 Already have an account?<span className=" text-foreground group-hover:underline underline-offset-3">Sign In</span>
                             </Button>
                         </Link>

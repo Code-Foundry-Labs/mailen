@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+
 import AuthCard from "@/components/auth/auth-card"
 import { Button } from "@/components/ui/button"
 import {
@@ -28,6 +30,7 @@ import { Plus, X } from "lucide-react"
 import { useFieldArray, useForm } from "react-hook-form"
 
 const InviteTeamPage = () => {
+    const router = useRouter()
     const form = useForm<inviteTeamFormData>({
         resolver: zodResolver(inviteTeamSchema),
         defaultValues: {
@@ -45,6 +48,11 @@ const InviteTeamPage = () => {
         const validMembers = data.members.filter(m => m.email.trim() !== "")
         console.log(validMembers)
         // TODO: Implement invite logic
+        router.push("/welcome")
+    }
+
+    const onSkip = () => {
+        router.push("/welcome")
     }
 
     const addEmailField = () => {
@@ -132,7 +140,7 @@ const InviteTeamPage = () => {
                         <Button type="submit" className="w-full mt-4">
                             Continue
                         </Button>
-                        <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
+                        <Button type="button" variant="ghost" onClick={onSkip} className="w-full gap-1 group h-9 md:h-9">
                             I&apos;ll do this later
                         </Button>
                     </form>

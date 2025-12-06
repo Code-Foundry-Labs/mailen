@@ -18,14 +18,19 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { toast } from "@/lib/toast-store"
 import {
     domainFormData,
     domainSchema,
     regionOptions,
 } from "@/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation, useQuery } from "convex/react"
 import * as Flags from "country-flag-icons/react/3x2"
+import { Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
+import { api } from "@/../convex/_generated/api"
 
 const CountryFlag = ({ countryCode }: { countryCode: string }) => {
     const FlagComponent = Flags[countryCode as keyof typeof Flags]
@@ -34,6 +39,10 @@ const CountryFlag = ({ countryCode }: { countryCode: string }) => {
 }
 
 const AddDomainPage = () => {
+    const router = useRouter()
+    const userWorkspace = useQuery(api.workspaces.getUserWorkspace)
+    const createDomain = useMutation(api.domains.create)
+
     const form = useForm<domainFormData>({
         resolver: zodResolver(domainSchema),
         defaultValues: {
@@ -42,9 +51,24 @@ const AddDomainPage = () => {
         },
     })
 
-    const onSubmit = (data: domainFormData) => {
-        console.log(data)
-        // TODO: Implement domain setup logic
+    const onSubmit = async (data: domainFormData) => {
+        if (!userWorkspace) return;
+
+        try {
+            await createDomain({
+                workspaceId: userWorkspace._id,
+                domain: data.domain,
+                region: data.region,
+            })
+            router.push("/sign-up/invite-team")
+        } catch (error) {
+            console.error(error)
+            toast.error("Failed to add domain")
+        }
+    }
+
+    const onSkip = async () => {
+        router.push("/sign-up/invite-team")
     }
 
     return (
@@ -139,10 +163,14 @@ const AddDomainPage = () => {
                             </div>
                         </div>
 
-                        <Button type="submit" className="w-full mt-4">
-                            Add Domain
+                        <Button type="submit" className="w-full mt-4" disabled={form.formState.isSubmitting || !userWorkspace}>
+                            {form.formState.isSubmitting ? (
+                                <><Loader2 className="mr-2 size-4 animate-spin" /> Adding Domain...</>
+                            ) : (
+                                "Add Domain"
+                            )}
                         </Button>
-                        <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
+                        <Button type="button" variant="ghost" onClick={onSkip} className="w-full gap-1 group h-9 md:h-9">
                             I&apos;ll do this later
                         </Button>
                     </form>

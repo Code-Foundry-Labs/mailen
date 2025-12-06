@@ -5,7 +5,7 @@ import Link from "next/link"
 
 const Home = () => {
   return (
-    <main>
+    <main className=" h-screen w-full flex items-center gap-4 justify-center">
       <Link href="/sign-up">
         <Button>Sign Up</Button>
       </Link>

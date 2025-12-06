@@ -13,10 +13,18 @@ import {
 import { PasswordInput } from "@/components/ui/password-input"
 import { resetPasswordFormData, resetPasswordSchema } from "@/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMemo } from "react"
+import { useMemo, Suspense } from "react"
 import { useForm } from "react-hook-form"
+import { authClient } from "@/lib/auth-client"
+import { toast } from "@/lib/toast-store"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Loader2 } from "lucide-react"
 
-const SetNewPasswordPage = () => {
+const ResetForm = () => {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const code = searchParams.get("code")
+
     const form = useForm<resetPasswordFormData>({
         resolver: zodResolver(resetPasswordSchema),
         defaultValues: {
@@ -50,9 +58,23 @@ const SetNewPasswordPage = () => {
 
     const isStrong = passedChecks === 4
 
-    const onSubmit = (data: resetPasswordFormData) => {
-        console.log(data)
-        // TODO: Implement sign in logic
+    const onSubmit = async (data: resetPasswordFormData) => {
+        if (!code) {
+            toast.error("Missing reset code")
+            return
+        }
+        await authClient.resetPassword({
+            newPassword: data.password,
+            token: code,
+        }, {
+            onSuccess: () => {
+                toast.success("Password reset successfully")
+                router.push("/sign-in")
+            },
+            onError: (ctx) => {
+                toast.error(ctx.error.message)
+            }
+        })
     }
 
     return (
@@ -150,13 +172,25 @@ const SetNewPasswordPage = () => {
                             </ul>
                         </div>
 
-                        <Button type="submit" className="w-full mt-4">
-                            Set New Password
+                        <Button type="submit" className="w-full mt-4" disabled={form.formState.isSubmitting}>
+                            {form.formState.isSubmitting ? (
+                                <><Loader2 className="mr-2 size-4 animate-spin" /> Resetting...</>
+                            ) : (
+                                "Set New Password"
+                            )}
                         </Button>
                     </form>
                 </Form>
             </AuthCard>
         </div>
+    )
+}
+
+const SetNewPasswordPage = () => {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ResetForm />
+        </Suspense>
     )
 }
 

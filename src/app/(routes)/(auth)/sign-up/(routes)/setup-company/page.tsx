@@ -1,5 +1,6 @@
 "use client"
 
+import { api } from "@/../convex/_generated/api"
 import AuthCard from "@/components/auth/auth-card"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,6 +19,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { toast } from "@/lib/toast-store"
 import {
     companyFormData,
     companySchema,
@@ -25,9 +27,16 @@ import {
     industryOptions,
 } from "@/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useMutation, useQuery } from "convex/react"
+import { Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 
 const SetupCompany = () => {
+    const router = useRouter()
+    const userWorkspace = useQuery(api.workspaces.getUserWorkspace)
+    const createCompany = useMutation(api.companies.create)
+
     const form = useForm<companyFormData>({
         resolver: zodResolver(companySchema),
         defaultValues: {
@@ -37,9 +46,25 @@ const SetupCompany = () => {
         },
     })
 
-    const onSubmit = (data: companyFormData) => {
-        console.log(data)
-        // TODO: Implement company setup logic
+    const onSubmit = async (data: companyFormData) => {
+        if (!userWorkspace) return;
+
+        try {
+            await createCompany({
+                workspaceId: userWorkspace._id,
+                website: data.website,
+                industry: data.industry,
+                companySize: data.companySize,
+            })
+            router.push("/sign-up/setup-domain")
+        } catch (error) {
+            console.error(error)
+            toast.error("Failed to update company details")
+        }
+    }
+
+    const onSkip = async () => {
+        router.push("/sign-up/setup-domain")
     }
 
     return (
@@ -127,10 +152,14 @@ const SetupCompany = () => {
                             )}
                         />
 
-                        <Button type="submit" className="w-full mt-8">
-                            Continue
+                        <Button type="submit" className="w-full mt-8" disabled={form.formState.isSubmitting || !userWorkspace}>
+                            {form.formState.isSubmitting ? (
+                                <><Loader2 className="mr-2 size-4 animate-spin" /> Saving...</>
+                            ) : (
+                                "Continue"
+                            )}
                         </Button>
-                        <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
+                        <Button type="button" variant="ghost" onClick={onSkip} className="w-full gap-1 group h-9 md:h-9">
                             I&apos;ll do this later
                         </Button>
                     </form>

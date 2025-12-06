@@ -15,9 +15,22 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { OtpInput } from "@/components/ui/otp-input"
+import { authClient } from "@/lib/auth-client"
+import { toast } from "@/lib/toast-store"
+import { api } from "@/../convex/_generated/api"
+import { useQuery } from "convex/react"
+import { Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 
 const VerifyEmailPage = () => {
+    const router = useRouter()
+    const [isLoading, setIsLoading] = useState(false)
+    const user = useQuery(api.auth.getCurrentUser)
+
+    const email = user?.email || ""
+
     const form = useForm<TwoFactorFormData>({
         resolver: zodResolver(twoFactorSchema),
         defaultValues: {
@@ -25,9 +38,29 @@ const VerifyEmailPage = () => {
         },
     })
 
-    const onSubmit = (data: TwoFactorFormData) => {
-        console.log(data)
-        // TODO: Implement sign in logic
+    const onSubmit = async (data: TwoFactorFormData) => {
+        setIsLoading(true)
+
+        const { error } = await authClient.emailOtp.verifyEmail({
+            email,
+            otp: data.code.replace(/-/g, ""), // Remove all dashes for verification
+        })
+
+        if (error) {
+            toast.error(error.message ?? "Invalid OTP code")
+            setIsLoading(false)
+            return
+        }
+
+        router.push("/sign-up/setup-workspace")
+    }
+
+    const handleResend = async () => {
+        if (!email) return;
+        await authClient.emailOtp.sendVerificationOtp({
+            email,
+            type: "email-verification",
+        })
     }
 
     return (
@@ -37,7 +70,7 @@ const VerifyEmailPage = () => {
                 description="We’ve sent the verification code. Please check your inbox and spam"
             >
                 <div className=" w-full flex items-center justify-center -mt-6 text-sm md:text-base tracking-tight">
-                    <span className="text-center font-medium">example@mailen.co</span>
+                    <span className="text-center font-medium">{email || "your email"}</span>
                 </div>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-2 mt-4">
@@ -62,11 +95,19 @@ const VerifyEmailPage = () => {
                                 </FormItem>
                             )}
                         />
-                        <Button variant="ghost" className="w-full gap-1 group">
-                            Didn’t receive the code?<span className=" text-foreground group-hover:underline underline-offset-3">Resend in 30s</span>
+
+                        <Button type="button" variant="ghost" className="w-full gap-1 group" onClick={handleResend}>
+                            Didn’t receive the code?<span className=" text-foreground group-hover:underline underline-offset-3">Resend</span>
                         </Button>
-                        <Button type="submit" className="w-full">
-                            Continue to Account Setup
+                        <Button type="submit" className="w-full" disabled={isLoading}>
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="size-4 animate-spin" />
+                                    Verifying...
+                                </>
+                            ) : (
+                                "Continue to Account Setup"
+                            )}
                         </Button>
                     </form>
                 </Form>

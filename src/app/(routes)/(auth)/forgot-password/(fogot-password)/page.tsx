@@ -14,9 +14,15 @@ import { Input } from "@/components/ui/input"
 import { emailFormData, emailSchema } from "@/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import { authClient } from "@/lib/auth-client"
+import { toast } from "@/lib/toast-store"
+import { useRouter } from "next/navigation"
+import { Loader2 } from "lucide-react"
+import Link from "next/link"
 
 
 const ForgotPasswordPage = () => {
+    const router = useRouter()
     const form = useForm<emailFormData>({
         resolver: zodResolver(emailSchema),
         defaultValues: {
@@ -24,9 +30,18 @@ const ForgotPasswordPage = () => {
         },
     })
 
-    const onSubmit = (data: emailFormData) => {
-        console.log(data)
-        // TODO: Implement sign in logic
+    const onSubmit = async (data: emailFormData) => {
+        await authClient.forgetPassword({
+            email: data.email,
+            redirectTo: "/forgot-password/reset",
+        }, {
+            onSuccess: () => {
+                router.push("/forgot-password/authentication")
+            },
+            onError: (ctx) => {
+                toast.error(ctx.error.message)
+            }
+        })
     }
     return (
         <div className=" w-full flex flex-col items-center">
@@ -56,12 +71,18 @@ const ForgotPasswordPage = () => {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" className="w-full mt-4">
-                            Send Reset Code
+                        <Button type="submit" className="w-full mt-4" disabled={form.formState.isSubmitting}>
+                            {form.formState.isSubmitting ? (
+                                <><Loader2 className="mr-2 size-4 animate-spin" /> Sending...</>
+                            ) : (
+                                "Send Reset Code"
+                            )}
                         </Button>
-                        <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
-                            Back to Sign In
-                        </Button>
+                        <Link href="/sign-in">
+                            <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
+                                Back to Sign In
+                            </Button>
+                        </Link>
                     </form>
                 </Form>
             </AuthCard>

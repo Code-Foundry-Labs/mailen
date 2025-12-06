@@ -1,7 +1,7 @@
 "use client"
 
 import AuthCard from "@/components/auth/auth-card"
-import {  TwoFactorFormData, twoFactorSchema } from "@/schemas"
+import { TwoFactorFormData, twoFactorSchema } from "@/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 
@@ -15,9 +15,11 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { OtpInput } from "@/components/ui/otp-input"
+import { useRouter } from "next/navigation"
 
 
 const ForgotPasswordAuthenticationPage = () => {
+    const router = useRouter()
     const form = useForm<TwoFactorFormData>({
         resolver: zodResolver(twoFactorSchema),
         defaultValues: {
@@ -26,8 +28,7 @@ const ForgotPasswordAuthenticationPage = () => {
     })
 
     const onSubmit = (data: TwoFactorFormData) => {
-        console.log(data)
-        // TODO: Implement sign in logic
+        router.push(`/forgot-password/reset?code=${data.code}`)
     }
 
     return (
@@ -59,11 +60,11 @@ const ForgotPasswordAuthenticationPage = () => {
                                 </FormItem>
                             )}
                         />
-                        <Button variant="ghost" className="w-full gap-1 group">
+                        <Button type="button" variant="ghost" className="w-full gap-1 group">
                             Didn’t receive the code?<span className=" text-foreground group-hover:underline underline-offset-3">Resend in 30s</span>
                         </Button>
                         <Button type="submit" className="w-full">
-                            Continue to Dashboard
+                            Continue to Reset
                         </Button>
                     </form>
                 </Form>

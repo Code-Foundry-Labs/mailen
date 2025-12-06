@@ -12,12 +12,17 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { PasswordInput } from "@/components/ui/password-input"
+import { authClient } from "@/lib/auth-client"
+import { toast } from "@/lib/toast-store"
 import { signInSchema, type signInFormData } from "@/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Loader2 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 
 const SignInPage = () => {
+    const router = useRouter()
     const form = useForm<signInFormData>({
         resolver: zodResolver(signInSchema),
         defaultValues: {
@@ -26,9 +31,18 @@ const SignInPage = () => {
         },
     })
 
-    const onSubmit = (data: signInFormData) => {
-        console.log(data)
-        // TODO: Implement sign in logic
+    const onSubmit = async (data: signInFormData) => {
+        await authClient.signIn.email({
+            email: data.email,
+            password: data.password,
+        }, {
+            onSuccess: () => {
+                router.push("/dashboard")
+            },
+            onError: (ctx) => {
+                toast.error(ctx.error.message)
+            }
+        })
     }
 
     return (
@@ -85,12 +99,18 @@ const SignInPage = () => {
                                 Forgot Password?<span className=" text-foreground group-hover:underline underline-offset-3">Reset</span>
                             </Button>
                         </Link>
-                        <Button type="submit" className="w-full mt-4">
-                            Sign In
+                        <Button type="submit" className="w-full mt-4" disabled={form.formState.isSubmitting}>
+                            {form.formState.isSubmitting ? (
+                                <><Loader2 className="mr-2 size-4 animate-spin" /> Signing In...</>
+                            ) : (
+                                "Sign In"
+                            )}
                         </Button>
-                        <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
-                            Don&apos;t have an account?<span className=" text-foreground group-hover:underline underline-offset-3">Create Account</span>
-                        </Button>
+                        <Link href="/sign-up">
+                            <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
+                                Don&apos;t have an account?<span className=" text-foreground group-hover:underline underline-offset-3">Create Account</span>
+                            </Button>
+                        </Link>
                     </form>
                 </Form>
             </AuthCard>

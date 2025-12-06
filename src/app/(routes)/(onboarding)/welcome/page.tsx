@@ -1,6 +1,7 @@
 import AuthCard from "@/components/auth/auth-card"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import Link from "next/link"
 
 const WelcomePage = () => {
     return (
@@ -21,9 +22,11 @@ const WelcomePage = () => {
                     <Button type="submit" className="w-full">
                         Show me around
                     </Button>
-                    <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
-                        Skip
-                    </Button>
+                    <Link href="/dashboard">
+                        <Button variant="ghost" className="w-full gap-1 group h-9 md:h-9">
+                            Skip
+                        </Button>
+                    </Link>
                 </AuthCard>
             </div>
         </div>
