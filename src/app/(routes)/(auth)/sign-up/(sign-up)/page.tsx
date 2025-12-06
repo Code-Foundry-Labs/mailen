@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { PasswordInput } from "@/components/ui/password-input"
 import { authClient } from "@/lib/auth-client"
+import { toast } from "@/lib/toast-store"
 import { signUpFormData, signUpSchema } from "@/schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react"
@@ -25,7 +26,6 @@ import { useForm } from "react-hook-form"
 const SignUpPage = () => {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
 
     const form = useForm<signUpFormData>({
         resolver: zodResolver(signUpSchema),
@@ -40,7 +40,6 @@ const SignUpPage = () => {
 
     const onSubmit = async (data: signUpFormData) => {
         setIsLoading(true)
-        setError(null)
 
         const { error } = await authClient.signUp.email({
             email: data.email,
@@ -49,7 +48,7 @@ const SignUpPage = () => {
         })
 
         if (error) {
-            setError(error.message ?? "An error occurred during sign up")
+            toast.error(error.message ?? "An error occurred during sign up")
             setIsLoading(false)
             return
         }
@@ -128,12 +127,6 @@ const SignUpPage = () => {
                                 </FormItem>
                             )}
                         />
-
-                        {error && (
-                            <div className="rounded-xl py-3 px-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                                {error}
-                            </div>
-                        )}
 
                         <Button type="submit" className="w-full mt-4" disabled={isLoading}>
                             {isLoading ? (
