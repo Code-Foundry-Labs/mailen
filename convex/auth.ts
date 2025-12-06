@@ -7,12 +7,7 @@ import { components } from "./_generated/api";
 import { DataModel } from "./_generated/dataModel";
 import { query } from "./_generated/server";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 
-const siteUrl = process.env.SITE_URL!;
-
-// The component client has methods needed for integrating Convex with Better Auth,
-// as well as helper methods for general use.
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
 export const createAuth = (
@@ -20,18 +15,16 @@ export const createAuth = (
   { optionsOnly } = { optionsOnly: false },
 ) => {
   return betterAuth({
-    // disable logging when createAuth is called just to generate options.
-    // this is not required, but there's a lot of noise in logs without it.
     logger: {
       disabled: optionsOnly,
     },
-    baseURL: siteUrl,
+    baseURL: process.env.SITE_URL!,
     database: authComponent.adapter(ctx),
-    // Configure simple, non-verified email/password to get started
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
       async sendResetPassword({ user, url, token }) {
+        const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
           from: "Acme <onboarding@resend.dev>",
           to: user.email,
@@ -47,12 +40,12 @@ export const createAuth = (
       },
     },
     plugins: [
-      // The Convex plugin is required for Convex compatibility
       convex(),
       emailOTP({
         otpLength: 9,
         sendVerificationOnSignUp: true,
         async sendVerificationOTP({ email, otp, type }) {
+          const resend = new Resend(process.env.RESEND_API_KEY);
           const formattedOtp = `${otp.slice(0, 3)}-${otp.slice(3, 6)}-${otp.slice(6)}`;
           await resend.emails.send({
             from: 'Acme <onboarding@resend.dev>',
@@ -68,8 +61,6 @@ export const createAuth = (
   });
 };
 
-// Example function for getting the current user
-// Feel free to edit, omit, etc.
 export const getCurrentUser = query({
   args: {},
   handler: async (ctx) => {
