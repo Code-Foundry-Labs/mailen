@@ -19,6 +19,10 @@ export const createAuth = (
       disabled: optionsOnly,
     },
     baseURL: process.env.SITE_URL!,
+    trustedOrigins: [
+      "https://mailen.vercel.app",
+      "http://localhost:3000"
+    ],
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
