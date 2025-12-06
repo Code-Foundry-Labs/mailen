@@ -20,7 +20,8 @@ export const createAuth = (
     logger: {
       disabled: optionsOnly,
     },
-    trustedOrigins: [siteUrl],
+    baseURL: siteUrl,
+    trustedOrigins: [siteUrl, "http://localhost:3000"],
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: true,
